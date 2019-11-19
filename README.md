@@ -1,4 +1,6 @@
 # teste_amcom
+[![Maintainability](https://api.codeclimate.com/v1/badges/478ce03c9f21fa113a05/maintainability)](https://codeclimate.com/github/lscasanova/teste_amcom/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/478ce03c9f21fa113a05/test_coverage)](https://codeclimate.com/github/lscasanova/teste_amcom/test_coverage)
 
 ### Instalar as dependencias do python
 pip install -r requirements.txt
