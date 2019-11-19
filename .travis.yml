@@ -16,4 +16,5 @@ before_script:
 script:
   coverage run amcom/manage.py test
 after_script:
+  - coverage xml
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
