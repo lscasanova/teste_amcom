@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 
 from vendas.models import Produto, Vendedor, Cliente, Venda
-from vendas.serializers import ProdutoSerializer, VendedorSerializer, ClienteSerializer, VendaSerializer, ComissaoSerializer
+from vendas.serializers import ProdutoSerializer, VendedorSerializer, ClienteSerializer, VendaSerializer
 
 
 class ProdutoViewSet(viewsets.ModelViewSet):
@@ -23,7 +23,6 @@ class VendedorViewSet(viewsets.ModelViewSet):
     """
     queryset = Vendedor.objects.all()
     serializer_class = VendedorSerializer
-    comissao_serializer = ComissaoSerializer
 
     @action(methods=['get'], detail=True)
     def comissao_por_periodo(self, request, pk=None):
