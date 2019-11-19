@@ -24,6 +24,7 @@ router.register(r'vendedores', views.VendedorViewSet)
 router.register(r'clientes', views.ClienteViewSet)
 router.register(r'vendas', views.VendaViewSet)
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
