@@ -1,6 +1,3 @@
-env:
-  global:
-    - CC_TEST_REPORTER_ID=85ab071861c7d30ea718846ec262a1c2b3c9d213204d6a4a1db8428843de6905
 language: python
 python:
   - "3.8"
