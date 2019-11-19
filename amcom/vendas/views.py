@@ -1,4 +1,6 @@
 from datetime import date, time
+from collections import OrderedDict
+from operator import itemgetter   
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -15,6 +17,20 @@ class ProdutoViewSet(viewsets.ModelViewSet):
     """
     queryset = Produto.objects.all()
     serializer_class = ProdutoSerializer
+
+    @action(methods=['get'], detail=False)
+    def produtos_mais_vendidos_por_periodo(self, request, pk=None):
+        vendas_no_periodo = Venda.objects.filter(
+            data_hora__gte=date.fromisoformat(request.data["data_inicial"]),
+            data_hora__lte=date.fromisoformat(request.data["data_final"]))
+        produto_quantidade = {}
+        for venda in vendas_no_periodo:
+            for produto in venda.produto.all():
+                produto_quantidade.update({produto.nome: 
+                                          produto_quantidade.get(produto.nome, 0)+1})
+
+        produto_quantidade = OrderedDict(sorted(produto_quantidade.items(), key = itemgetter(1), reverse = True))
+        return Response(produto_quantidade)
 
 
 class VendedorViewSet(viewsets.ModelViewSet):
@@ -49,6 +65,20 @@ class ClienteViewSet(viewsets.ModelViewSet):
     """
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+
+    @action(methods=['get'], detail=True)
+    def produtos_vendidos_por_periodo(self, request, pk=None):
+        cliente = self.get_object()
+        vendas_no_periodo = Venda.objects.filter(
+            cliente=cliente,
+            data_hora__gte=date.fromisoformat(request.data["data_inicial"]),
+            data_hora__lte=date.fromisoformat(request.data["data_final"]))
+        produtos = {}
+        for venda in vendas_no_periodo:
+            for produto in venda.produto.all():
+                produtos.update({produto.id: 
+                                          produto.nome})
+        return Response(produtos)
 
 
 class VendaViewSet(viewsets.ModelViewSet):
