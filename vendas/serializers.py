@@ -27,5 +27,5 @@ class VendaSerializer (serializers.ModelSerializer):
 
 
 class DataSerializer (serializers.Serializer):
-    data_inicial = serializers.DateTimeField()
-    data_final = serializers.DateTimeField()
+    data_inicial = serializers.DateField()
+    data_final = serializers.DateField()
