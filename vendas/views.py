@@ -1,6 +1,6 @@
 from datetime import date, time
 from collections import OrderedDict
-from operator import itemgetter   
+from operator import itemgetter
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 
 from vendas.models import Produto, Vendedor, Cliente, Venda
-from vendas.serializers import ProdutoSerializer, VendedorSerializer, ClienteSerializer, VendaSerializer
+from vendas.serializers import ProdutoSerializer, VendedorSerializer, ClienteSerializer, VendaSerializer, DataSerializer
 
 
 class ProdutoViewSet(viewsets.ModelViewSet):
@@ -20,9 +20,17 @@ class ProdutoViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False)
     def produtos_mais_vendidos_por_periodo(self, request, pk=None):
-        vendas_no_periodo = Venda.objects.filter(
-            data_hora__gte=date.fromisoformat(request.data["data_inicial"]),
-            data_hora__lte=date.fromisoformat(request.data["data_final"]))
+        """
+        Apresenta os produtos mais vendidos em um intervalo de datas, apresentados em ordem decrescente
+        """
+        serializer = DataSerializer(data=request.data)
+        if serializer.is_valid():
+            vendas_no_periodo = Venda.objects.filter(
+                data_hora__gte=date.fromisoformat(serializer.data["data_inicial"]),
+                data_hora__lte=date.fromisoformat(serializer.data["data_final"]))
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
         produto_quantidade = {}
         for venda in vendas_no_periodo:
             for produto in venda.produto.all():
@@ -42,11 +50,20 @@ class VendedorViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=True)
     def comissao_por_periodo(self, request, pk=None):
+        """
+        Apresenta o valor total da comissão do vendedor em um intervalo de datas
+        """
         vendedor = self.get_object()
-        vendas_no_periodo = Venda.objects.filter(
-            vendedor=vendedor,
-            data_hora__gte=date.fromisoformat(request.data["data_inicial"]),
-            data_hora__lte=date.fromisoformat(request.data["data_final"]))
+        serializer = DataSerializer(data=request.data)
+        if serializer.is_valid():
+            vendas_no_periodo = Venda.objects.filter(
+                vendedor=vendedor,
+                data_hora__gte=date.fromisoformat(serializer.data["data_inicial"]),
+                data_hora__lte=date.fromisoformat(serializer.data["data_final"]))
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
         valor_comissao = 0
         for venda in vendas_no_periodo:
             for produto in venda.produto.all():
@@ -55,9 +72,9 @@ class VendedorViewSet(viewsets.ModelViewSet):
                 else:
                     comissao = max(produto.comissao, 4)
                 valor_comissao += (produto.preco * comissao) / 100
-        
+
         return Response({"valor_comissao": valor_comissao})
-        
+
 
 class ClienteViewSet(viewsets.ModelViewSet):
     """
@@ -67,17 +84,25 @@ class ClienteViewSet(viewsets.ModelViewSet):
     serializer_class = ClienteSerializer
 
     @action(methods=['get'], detail=True)
-    def produtos_vendidos_por_periodo(self, request, pk=None):
+    def produtos_comprados_no_periodo(self, request, pk=None):
+        """
+        Apresenta os produtos que o cliente comprou em um intervalo de datas.
+        """
         cliente = self.get_object()
-        vendas_no_periodo = Venda.objects.filter(
-            cliente=cliente,
-            data_hora__gte=date.fromisoformat(request.data["data_inicial"]),
-            data_hora__lte=date.fromisoformat(request.data["data_final"]))
+        serializer = DataSerializer(data=request.data)
+        if serializer.is_valid():
+            vendas_no_periodo = Venda.objects.filter(
+                cliente=cliente,
+                data_hora__gte=date.fromisoformat(serializer.data["data_inicial"]),
+                data_hora__lte=date.fromisoformat(serializer.data["data_final"]))
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
         produtos = {}
         for venda in vendas_no_periodo:
             for produto in venda.produto.all():
-                produtos.update({produto.id: 
-                                          produto.nome})
+                produtos.update({produto.id:
+                                 produto.nome})
         return Response(produtos)
 
 

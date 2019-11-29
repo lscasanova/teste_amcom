@@ -24,3 +24,8 @@ class VendaSerializer (serializers.ModelSerializer):
     class Meta:
         model = Venda
         fields = ["id", "data_hora", "vendedor", "cliente", "produto"]
+
+
+class DataSerializer (serializers.Serializer):
+    data_inicial = serializers.DateField()
+    data_final = serializers.DateField()
